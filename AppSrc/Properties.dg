@@ -1,0 +1,1480 @@
+Use DFClient.pkg
+Use Dftabdlg.pkg
+Use Windows.pkg
+Use DFEnChk.pkg
+Use dfallent.pkg
+Use dfcentry.pkg
+Use cImageList32.pkg
+Use dfSpnFrm.pkg
+Use TrckBr.pkg
+Use dfBitmap.pkg
+Use cDbReadDirComboform.pkg
+Use dfSpnEnt.pkg
+Use DFEntry.pkg
+Use cCJSkinFramework.pkg
+Use cRegistrySpinForm.pkg 
+Use cRegistryCheckBox.pkg
+Use cRegistryComboForm.pkg
+Use cRegistryForm.pkg
+Use SymDef.pkg // Symbol definitions for registry values/keys.
+Use File_dlg.pkg
+Use Akefs.pkg
+
+Use vWin32fh.pkg
+
+Object oProperties is a dbModalPanel
+
+    // Page_Object:
+    // Augmented to set the icon, we need to do it here as dialogs normally have small
+    // caption bars.  You can set the caption bar to large in construct Object but it doesn't
+    // bother setting the icon.
+    Procedure Page_Object Integer iState
+        Forward Send Page_Object iState
+        Set Icon to "Settings064N32v6.ico"
+    End_Procedure // Page_Object
+
+    Property Boolean pbFirstLoad    True   
+    Property Boolean pbApplied      False                                    
+    Property Boolean pbRestartApp   False                                       
+    Property Boolean pbSkinChange   False    
+    Property tSkinInformation[] pSkins
+
+    Set Typeface to "Tahoma"
+    Set FontSize to 14 0
+    Set Sysmenu_Icon to True
+    Set Label to "Program Preferences"
+    Set Locate_Mode to Center_On_Panel
+    Set Location to 0 199
+    Set Size to 272 247
+    Set piMinSize to 272 246
+    
+    // Called from OK and Apply buttons.              
+    Procedure DoApplyChanges
+        Integer iRetval
+        
+        If (pbSkinChange(Self) = True) Send ApplyCurrentSkin // Panel message.
+                 
+        // Tell all registry child controls to save/apply changed values to Windows registry.
+        // The ApplyChanges message is a class message that all cRegistryxxx
+        // classes understands. (See also cRegistryMixin.pkg.)
+        Broadcast Recursive Send ApplyChanges 
+         
+        If (pbRestartApp(Self) = False) Begin
+            // Did menu or toolbar settings change?
+            Send DoChangeCommandBars of ghoCommandBars
+        End // If (pbRestartApp(Self) = False) Begin
+        
+        If (pbRestartApp(Self) = True) Begin
+            If (pbEnableGroups(ghoApplication) = True) Begin 
+                Send Info_Box "A design-time property was changed. Such properties cannot be changed while the application is running.\nPlease re-start the application for changes to take effect."
+            End 
+            Else Begin 
+                Get YesNo_Box "A design-time property was changed. Such properties cannot normally be changed while the application is running.\n\nHowever, an attempt can be made to change the setting but you will loose any changes made to the menu/toolbar system. Do you want to try this?\n\n(If you answer Yes and it doesn't work, You will need to restart the application.)" to iRetval
+                If (iRetval = MBR_No)  Send Info_Box "Please re-start the application for changes to take effect."
+                If (iRetval = MBR_Yes) Begin 
+                    Send DoChangeCommandBars of ghoCommandBars
+                    Send RestoreLayout  of ghoCommandBars               
+                End
+            End
+            Set pbRestartApp to False
+        End // If (pbRestartApp(Self) = True) Begin
+
+        Set pbApplied                    to True   
+        Set pbSkinChange                 to False
+        Set Enabled_State of oApply_btn  to False
+    End_Procedure // DoApplyChanges           
+                            
+    Object oPropertiesDbTabDialog is a dbTabDialog
+        Set Typeface to "Tahoma"
+        Set FontSize to 14 0
+        Set Size to 246 236
+        Set Location to 5 6
+        Set peAnchors to anAll
+        Set Skip_Button_Mode to SBM_Never
+
+        Object oGeneral_tp is a dbTabPage
+            Set Label to "Geral"
+            Set Tab_ToolTip_Value to "General Settings"
+
+//            Object oGeneral_grp is a dbGroup
+//                Set Typeface to "Tahoma"
+//                Set FontSize to 14 0
+//                Set Size to 40 204
+//                Set Location to 4 13
+//                Set Label to "Program Start"
+//                Set peAnchors to anTopLeftRight
+//
+//                Object oStartUpMode_rcb is a cRegistryCheckBox
+//                    Set Typeface to "Tahoma"
+//                    Set FontSize to 14 0
+//                    Set Location to 12 22
+//                    Set Size to 10 60
+//                    Set Label to "Run Welcome Screen"
+//                    Set psRegKey to C_Preferences
+//                    Set psRegVal to C_IsWelcomeScreen 
+//                    Set piRegValType to RMC_Registry_DWord
+//                    Set psDefaultValue to "1"
+//
+//                    Procedure Select_Toggling Integer iItm Integer iState
+//                        Forward Send Select_toggling iItm iState
+//                        Set Enabled_State of oApply_btn to True
+//                        Set Enabled_State of oHelpStartUpMode_rcb to (Checked_State(Self))
+//                    End_Procedure
+//
+//                End_Object // oStartUpMode_rcb
+//
+//                Object oHelpStartUpMode_rcb is a cRegistryCheckBox
+//                    Set Typeface to "Tahoma"
+//                    Set FontSize to 14 0
+//                    Set Location to 26 34
+//                    Set Size to 10 96
+//                    Set Label to "Display Topic Help"
+//                    Set psRegKey to C_Preferences
+//                    Set psRegVal to C_HelpStartupMode 
+//                    Set piRegValType to RMC_Registry_DWord
+//                    Set psDefaultValue to "0"
+//
+//                    Procedure Select_Toggling Integer iItm Integer iState
+//                        Forward Send Select_toggling iItm iState
+//                        Set Enabled_State of oApply_btn to True
+//                    End_Procedure
+//
+//                End_Object // oHelpStartUpMode_rcb
+//                
+//            End_Object // oGeneral_grp
+
+            Object oDisplayOptions_grp is a dbGroup
+                Set Size to 68 204
+                Set Location to 4 13
+                Set Label to "Op‡äes de Display"
+                Set Typeface to "Tahoma"
+                Set FontSize to 14 0
+                Set peAnchors to anTopLeftRight
+
+                Object oMenuBars_rcb is a cRegistryCheckBox
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Auto_Size_State to False
+                    Set Location to 12 22
+                    Set Size to 11 177
+                    Set Label to "Adicionar/Remover Menus"
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_IsMenuBarVisible
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "1"
+
+                    Procedure Select_Toggling Integer iItm Integer iState
+                        Forward Send Select_Toggling iItm iState
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+
+                    Procedure ApplyChanges
+                        Boolean bState bActive
+                        Forward Send ApplyChanges      // Write changes to registry.
+                        Get Active_State to bActive    // If visible on screen
+                        If (bActive = False) Begin     // Not active yet.
+                            Send ReadValueFromRegistry // Use values from registry
+                        End
+                        Get Checked_State to bState
+                        Set pbVisible of ghoMenuBar to bState
+                    End_Procedure // ApplyChanges
+                      
+                    // We need special handling for the menu and the toolbar,
+                    // because the setting can be changed with the CodeJock
+                    // right-click popup. In that case the registry value wasn't set.
+                    Procedure Add_Focus Handle hoParent Returns Integer
+                        Boolean bState bChecked 
+                        Forward Send Add_Focus hoParent
+                        Get pbVisible of ghoMenuBar to bState
+                        Get Checked_State to bChecked
+                        If (bChecked <> bState) Set Checked_State to bState
+                    End_Procedure // Add_Focus
+
+                End_Object // oMenuBars_rcb
+
+                Object oToolBars_rcb is a cRegistryCheckBox
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Auto_Size_State to False
+                    Set Location to 26 22
+                    Set Size to 11 177
+                    Set Label to "Adicionar/Remover Toolbars"
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_IsToolBarVisible
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "1"
+                                       
+                    Procedure Select_Toggling Integer iItm Integer iState 
+                        Forward Send Select_Toggling iItm iState
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+                                             
+                    Procedure ApplyChanges
+                        Boolean bState bActive
+                        Forward Send ApplyChanges      // Write changes to registry.
+                        Get Active_State to bActive    // If visible on screen
+                        If (bActive = False) Begin
+                            Send ReadValueFromRegistry // Not Active yet.
+                        End
+                        Get Checked_State to bState
+                        Set Toolbar_State of (Client_Id(ghoMainPanel)) to bState
+                        Set pbVisible     of ghoToolBar to bState
+                    End_Procedure // ApplyChanges
+                    
+                    // We need special handling for the menu and the toolbar,
+                    // because the setting can have been changed with the CodeJock
+                    // right-click popup, in which case the registry value wasn't set.
+                    Procedure Add_Focus Handle hoParent Returns Integer
+                        Boolean bState bChecked 
+                        Forward Send Add_Focus hoParent
+                        Get pbVisible of ghoToolBar to bState 
+                        Get Checked_State to bChecked
+                        If (bState <> bChecked) Set Checked_State to bState
+                    End_Procedure // Add_Focus
+
+                End_Object // oToolBars_rcb
+
+                Object oViewTabPages_rcb is a cRegistryCheckBox
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Auto_Size_State to False
+                    Set Location to 40 22
+                    Set Size to 11 177
+                    Set Label to "Adicionar/Remover TabPages"
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_IsTabPagesVisible
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "1"
+
+                    Procedure Select_Toggling Integer iItm Integer iState
+                        Boolean bEnableGroups
+                        Get ReadDword of ghoApplication C_Preferences C_TabEnableGroups False to bEnableGroups
+                        If (bEnableGroups = True) Begin 
+                            Send Info_Box "'Enable Groups' for Tab Pages has been turned ON. It needs to be turned OFF before this setting can be changed."
+                            Procedure_Return
+                        End
+                        Forward Send Select_Toggling iItm iState
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure // Select_Toggling
+                    
+                End_Object // oViewTabPages_rcb
+
+                Object oStatusBar_rcb is a cRegistryCheckBox
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 54 22
+                    Set Size to 11 176
+                    Set Auto_Size_State to False
+                    Set Label to "Adicionar/Remover Statusbar"
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_IsStatusBarVisible
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "1"
+
+                    Procedure Select_Toggling Integer iItm Integer iState
+                        Forward Send Select_Toggling iItm iState
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+
+                    Procedure ApplyChanges
+                        Boolean bState bActive
+                        Forward Send ApplyChanges      // Write changes to registry.
+                        Get Active_State to bActive    // If visible on screen
+                        If (bActive = False) Begin
+                            Send ReadValueFromRegistry // Not Active yet.
+                        End
+                        Get Checked_State to bState
+                        Set Statusbar_State of (Client_Id(ghoMainPanel)) to bState
+                    End_Procedure // ApplyChanges
+                                              
+                    // This will make it work just like the status_bar menu items.                          
+                    Procedure Add_Focus Handle hoParent Returns Integer
+                        Boolean bState bChecked 
+                        Handle hoClientArea
+                        Forward Send Add_Focus hoParent
+                        Get Client_Id of ghoMainPanel to hoClientArea
+                        If hoClientArea Begin
+                            // the clientarea's parent panel has message
+                            Get StatusBar_State of (Parent(hoClientArea)) to bState
+                        End
+                        Get Checked_State to bChecked
+                        If (bState <> bChecked) Set Checked_State to bState
+                    End_Procedure // Add_Focus
+
+                End_Object // oStatusBar_rcb
+                
+            End_Object // oDisplayOptions_grp
+
+            Object oClientareaImage_grp is a dbGroup
+                Set Typeface to "Tahoma"
+                Set FontSize to 14 0
+                Set Size to 58 204
+                Set Location to 81 13
+                Set Label to "Imagem de Fundo"
+                Set FontSize to 14 0
+                Set peAnchors to anTopLeftRight
+
+                Object oImageName_rcf is a cRegistryForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 13 120
+                    Set Location to 10 60
+                    Set Label_Justification_Mode to JMode_Right
+                    Set Label_Col_Offset to 2
+                    Set Prompt_Button_Mode to PB_PromptOn
+                    Set Form_Button_Bitmap item 0 to "Open016N32v2.bmp"
+                    Set Label to "Nome"
+                    Set Entry_State to False
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_ClientAreaImageName
+                    //Set psDefaultValue to "Background Image 2.bmp"
+                    
+                    Property String psClientAreaImagePath ""
+
+                    Set peAnchors to anTopLeftRight
+                
+                    Procedure OnChange
+                        String sVal
+                        Get Value to sVal
+                        Move (Trim(Uppercase(sVal))) to sVal
+                        If (sVal = "" or sVal = C_None) Begin
+                            Set Value of oFileSize_fm to ""
+                        End
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure   
+                            
+                    Procedure Prompt
+                        String sCurrentFileName sFileName sPath sSize
+                        Boolean bExist 
+                        Integer iSize
+                                              
+                        Get Value to sCurrentFileName 
+                        Move (Trim(sCurrentFileName)) to sCurrentFileName 
+                        Get psClientAreaImagePath     to sPath
+                                                                
+                        Get vSelect_File "Bitmap Files|*.bmp" "Please select a Bitmap file" sPath to sFileName // Function in vWin32fh.pkg
+                        If (Length(sFileName) = 0) Procedure_Return
+                        
+                        Get GetFileSize sFileName to iSize // Function in akefs.pkg
+                        If (iSize <> -1) Begin 
+                            Move (iSize / 1024) to iSize // Makes it to Kbytes 
+                            Move (String(iSize) * "Kbytes") to sSize
+                            Set Value of oFileSize_fm to sSize
+                        End
+                        
+                        Get ParseFolderName sFileName to sPath
+                        Set psClientAreaImagePath     to sPath                      // Object property.
+                        Get ParseFileName   sFileName to sCurrentFileName           
+                        Set Value                     to sCurrentFileName 
+                        Set Item_Changed_State        to True
+                    End_Procedure // Prompt 
+
+                    // Augment class message to also read the image path.                       
+                    Procedure ReadValueFromRegistry
+                        String sPath sFileName
+                        Integer iSize
+                        Forward Send ReadValueFromRegistry
+                        Get psBitmapPath of (phoWorkspace(ghoApplication)) to sPath
+                        Move (sPath + "\") to sPath
+                        Get ReadString of ghoApplication C_Preferences C_ClientAreaImagePath sPath to sPath
+                        Set psClientAreaImagePath to sPath                      // Object property.
+                        Get Value to sFileName
+                        Get GetFileSize (sPath - sFileName) to iSize
+                        If (iSize <> -1) Begin 
+                            Move (iSize / 1024) to iSize // Makes it to Kbytes 
+                            Set Value of oFileSize_fm to (String(iSize) * "Kbytes")
+                        End
+                        Set Enabled_State of oApply_btn to False
+                    End_Procedure // ReadValueFromRegistry
+                    
+                    // Augment class message to also save the image path.                       
+                    Procedure WriteValueToRegistry
+                        String sPath
+                        Forward Send WriteValueToRegistry
+                        Get psClientAreaImagePath to sPath
+                        Send WriteString of ghoApplication C_Preferences C_ClientAreaImagePath sPath
+                    End_Procedure // WriteValueToRegistry
+
+                    Procedure OnStartup 
+                        String sPath
+                        Get psBitmapPath of (phoWorkspace(ghoApplication)) to sPath
+                        Move (sPath + "\") to sPath
+                        Set psClientAreaImagePath to sPath                      // Object property.
+                    End_Procedure // OnStartup
+                    Send OnStartup
+                    
+                End_Object // oImageName_rcf
+
+                Object oFileSize_fm is a Form
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 25 60
+                    Set Size to 13 120
+                    Set Label_Col_Offset to 2     
+                    Set Label_Row_Offset to 1
+                    Set Enabled_State to False
+                    Set Label to "Tam. Arquivo"
+                    Set Label_Justification_Mode to JMode_Right
+                    Set peAnchors to anTopLeftRight
+                End_Object // oFileSize_fm
+
+                Object oBitmapStyle_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 13 120
+                    Set Location to 39 60
+                    Set Label_Justification_Mode to JMode_Right
+                    Set Label_Col_Offset to 2
+                    Set Label to "Estilo"
+                    Set Entry_State to False
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_ImageStyle
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "1" // 0=Bitmap_Stretch
+                    Set peAnchors to anTopLeftRight
+                
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Bitmap Actual"  Bitmap_Actual
+                        Send Combo_Add_Item "Bitmap Stretch" Bitmap_Stretch
+                        Send Combo_Add_Item "Bitmap Center"  Bitmap_Center
+                        Send Combo_Add_Item "Bitmap Tile"    Bitmap_Tile
+                    End_Procedure
+                    
+                    Procedure OnChange 
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure            
+                    
+                End_Object // oBitmapStyle_rcf
+
+            End_Object // oClientareaImage_grp
+            
+        End_Object
+
+        Object oSkins_tp is a dbTabPage
+            Set Label to "Skins"
+            Set Tab_ToolTip_Value to "Select an Application Skin"
+
+            Object oSkins_grp is a dbGroup
+                Set Typeface to "Tahoma"
+                Set FontSize to 14 0
+                Set Size to 167 204
+                Set Location to 4 13
+                Set Label to "Lista de Skins"
+                Set peAnchors to anAll
+
+                Object oSkinsList is a List
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 150 189
+                    Set Location to 10 8
+                    Set peAnchors to anAll
+                    Set Border_Style to Border_Normal
+                
+                    Procedure Set Current_Item Integer iItem  
+                        String sFile     
+                        tSkinInformation[] SkinsArray
+                        Forward Set Current_Item to iItem
+                        Get pSkins                          to SkinsArray
+                        If (iItem > 0) Decrement iItem      // We have a 'None' item in the list but not in array.
+                        Move (SkinsArray[iItem].sSkinFile)  to sFile
+                        Set Value of oPhysicalSkinFile_fm   to sFile
+                    End_Procedure // Set Current_Item  
+                    
+                    Procedure OnChange
+                        Set pbSkinChange                    to True 
+                        Set Enabled_State of oApply_btn     to True
+                    End_Procedure   
+                                        
+                    // Important:
+                    // This procedure is called by the LoadSkins message which is activated
+                    // when the dialog is put on the screen. The LoadSkins message uses a
+                    // custom made sort function to alphabetically sort the skins after description.
+                    // This is something the standard VDF skin logic does _not_ provide.
+                    // See also procedure LoadSkins. 
+                    // Note also that the currently loaded skin is highlighted in the list.                                        
+                    Procedure AddSkinsToList tSkinInformation[] SkinsArray
+                        Integer iSkinsCount iArrayItem iCurrent
+                        String  sFile sIni
+                        String  sSkin sCurrSkin
+                        Boolean bFound
+                        
+                        If (ghoSkinFramework < 1) Procedure_Return
+                        
+                        Set Dynamic_Update_State to False
+                        Send Delete_Data        // Clear list.
+
+                        // Get the currently loaded skin.
+                        Get psSkinFile of ghoSkinFramework to sFile
+                        Get psSkinIni  of ghoSkinFramework to sIni
+                        
+                        // Add a 'None' item to the top of list.
+                        Send Add_Item msg_None "None"                             
+                        Move 0 to iCurrent
+                        Move (SizeOfArray(SkinsArray)) to iSkinsCount
+                        
+                        // Read from Skins array and fill the list.
+                        For iArrayItem from 0 to (iSkinsCount-1)
+                            Move (SkinsArray[iArrayItem].sName * "-" * SkinsArray[iArrayItem].sSkinIni) to sSkin
+                            Send Add_Item msg_None sSkin
+                            Move (SkinsArray[iArrayItem].sSkinFile * "-" * SkinsArray[iArrayItem].sSkinIni) to sCurrSkin
+                            If (sCurrSkin = (sFile * "-" * sIni)) Move iArrayItem to iCurrent
+                        Loop
+            
+                        // Highlight the currently loaded skin in the list.
+                        If (iCurrent > 0) Begin
+                            Increment iCurrent                             // We have a 'None' item in the list but not in array.
+                            Set Select_State item iCurrent        to True   
+                            Set Enabled_State of oApply_btn       to False
+                            Set pbSkinChange                      to False 
+                            Decrement iCurrent                             // We have a 'None' item in the list but not in array.
+                            Move (SkinsArray[iCurrent].sSkinFile) to sFile
+                            Set Value of oPhysicalSkinFile_fm     to sFile
+                        End
+                                        
+                        Set Dynamic_Update_State to True
+                        Set Enabled_State of oApply_btn to False
+                    End_Procedure // AddSkinsToList
+
+                End_Object // oSkinsList
+                
+            End_Object // oSkins_grp
+
+            Object oPhysicalSkinFile_grp is a dbGroup
+                Set Typeface to "Tahoma"
+                Set FontSize to 14 0
+                Set Size to 25 204
+                Set Location to 188 13
+                Set Label to "Arquivo F¡sico (Skin)"
+                Set peAnchors to anBottomLeftRight
+
+                Object oPhysicalSkinFile_fm is a Form
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 9 5
+                    Set Size to 13 195
+                    Set Label_Col_Offset to 67
+                    Set Enabled_State to False
+                    Set Form_Justification_Mode to Form_DisplayCenter
+                    Set Form_Border to Border_None
+                    Set peAnchors to anTopLeftRight
+                End_Object // oPhysicalSkinFile_fm
+                
+            End_Object // oPhysicalskinFile_grp
+
+            Object oCurrentUsedSkin_grp is a dbGroup
+                Set Typeface to "Tahoma"
+                Set FontSize to 14 0
+                Set Size to 25 204
+                Set Location to 217 13
+                Set Label to "Skin Atual"
+                Set peAnchors to anBottomLeftRight
+
+                Object oCurrentSkin_fm is a Form
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 9 5
+                    Set Size to 13 195
+                    Set Label_Col_Offset to 67
+                    Set Enabled_State to False
+                    Set Form_Border to Border_None
+                    Set Form_Justification_Mode to Form_DisplayCenter
+                    Set peAnchors to anTopLeftRight
+                End_Object // oCurrentSkin_fm
+                
+            End_Object // oCurrentUsedSkin_grp
+            
+        End_Object // oSkins_tp
+
+        Object oMenuToolbar_tp is a dbTabPage
+            Set Tab_ToolTip_Value to "Change the look of the Application"
+            Set Label to "Menus e Toolbars"
+
+            Object oMenuGroup is a dbGroup
+                Set Typeface to "Tahoma"
+                Set FontSize to 14 0
+                Set Size to 88 204
+                Set Location to 4 13
+                Set Label to "Menus"
+                Set peAnchors to anTopLeftRight
+
+                Object oMenuIconSize_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 10 75
+                    Set Size to 13 120
+                    Set Label to "Tam. Öcone"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_CommandBarsOptions
+                    Set psRegVal to C_PopupIconsSize
+                    Set piRegValType to RMC_Registry_String  
+                    Set psDefaultValue to "24, 24"
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure      
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "16x16 pixels" "16, 16"
+                        Send Combo_Add_Item "24x24 pixels" "24, 24"
+                        Send Combo_Add_Item "32x32 pixels" "32, 32"
+                        Send Combo_Add_Item "48x48 pixels" "48, 48"
+                    End_Procedure // Combo_Fill_List
+                End_Object // oMenuIconSize_rcf
+
+                Object oDescription_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 13 120
+                    Set Location to 25 75
+                    Set Label_Justification_Mode to JMode_Right
+                    Set Label_Col_Offset to 2
+                    Set Label to "Mostrar Descri‡Æo"
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_MenubarControlStyle
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "5"
+                    Set peAnchors to anTopLeftRight
+                
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Yes" 5
+                        Send Combo_Add_Item "No"  0
+                    End_Procedure // Combo_Fill_List
+                
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                        Delegate Set pbRestartApp to True // Panel property.
+                    End_Procedure // OnChange
+                
+                End_Object // oDescription_rcf
+
+                Object opeAnimation_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 39 75
+                    Set Size to 13 120
+                    Set Label to "Efeito de abertura"
+                    Set Entry_State to False
+                    Set Label_Col_Offset to 2
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_CommandBarsOptions
+                    Set psRegVal to C_Animation
+                    Set piRegValType to RMC_Registry_DWord  
+                    Set psDefaultValue to "1"
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Windows Default" xtpAnimateWindowsDefault
+                        Send Combo_Add_Item "Random"          xtpAnimateRandom
+                        Send Combo_Add_Item "Unfold"          xtpAnimateUnfold
+                        Send Combo_Add_Item "Slide"           xtpAnimateSlide
+                        Send Combo_Add_Item "Fade"            xtpAnimateFade
+                        Send Combo_Add_Item "None"            xtpAnimateNone
+                    End_Procedure // Combo_Fill_List
+                
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+                End_Object // opeAnimation_rcf
+
+                Object oMenuPosition_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 54 75
+                    Set Size to 13 120
+                    Set Label_Col_Offset to 2
+                    Set Label_Justification_Mode to jMode_Right
+                    Set Label to "Posi‡Æo em tela"
+                    Set Entry_State to False
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_MenuPosition
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "0"                         // xtpBarTop
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True  
+                    End_Procedure
+
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Top"      xtpBarTop       // 0
+                        Send Combo_Add_Item "Bottom"   xtpBarBottom    // 1
+                        Send Combo_Add_Item "Left"     xtpBarLeft      // 2
+                        Send Combo_Add_Item "Right"    xtpBarRight     // 3
+                    End_Procedure // Combo_Fill_List
+                                 
+                    // We do not read the registry value here.
+                    // Why?
+                    // Well, the menu could have been dragged with the mouse by the user
+                    // to a new position, in case the registry value never was written.                
+                    Procedure Add_Focus Handle hoParent Returns Integer 
+                        Integer iPos 
+                        String  sVal 
+                        Boolean bPrivateAddingFocusOrg
+                        Forward Send Add_Focus hoParent
+                        Get ComPosition of ghoMenuBar to iPos
+                        Get Data_To_Description iPos  to sVal 
+                        // We don't want to trigger the OnChange event, so
+                        // temporarily disble it when adding this object to the focus tree.
+                        Get pbPrivateAddingFocus to bPrivateAddingFocusOrg
+                        Set pbPrivateAddingFocus to True
+                        Set Value to sVal
+                        Set pbPrivateAddingFocus to bPrivateAddingFocusOrg
+                    End_Procedure // Add_Focus
+                    
+                End_Object // oMenuPosition_rcf
+
+                Object oWrapLongMenus_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 13 120
+                    Set Location to 69 75
+                    Set Label_Justification_Mode to JMode_Right
+                    Set Label_Col_Offset to 2
+                    Set Label to "Wrap Long Menus"
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_WrapLongMenus
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "1"      // True
+                    Set peAnchors to anTopLeftRight
+                
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Yes" 1
+                        Send Combo_Add_Item "No"  0
+                    End_Procedure // Combo_Fill_List
+                
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure // OnChange
+                
+                End_Object // oWrapLongMenus_rcf
+
+            End_Object // oMenuGroup
+
+            Object oToolbarGroup is a dbGroup
+                Set Label to "Toolbars"
+                Set Typeface to "Tahoma"
+                Set Size to 57 204
+                Set Location to 102 13
+                Set FontSize to 14 0
+                Set peAnchors to anTopLeftRight
+
+                Object oToolbarBtnSize_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 10 75
+                    Set Size to 13 120
+                    Set Label to "Tam. Öcone"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_CommandBarsOptions
+                    Set psRegVal to C_IconsSize
+                    Set piRegValType to RMC_Registry_String  
+                    Set psDefaultValue to "32, 32"
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure     
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "16x16 pixels" "16, 16"
+                        Send Combo_Add_Item "24x24 pixels" "24, 24"
+                        Send Combo_Add_Item "32x32 pixels" "32, 32"
+                        Send Combo_Add_Item "48x48 pixels" "48, 48"
+                        Send Combo_Add_Item "64x64 pixels" "64, 64"
+                    End_Procedure // Combo_Fill_List
+                
+                    // We need to override the ReadValueFromRegistry message because CodeJock 
+                    // handles the size of toolbar buttons in an odd way.
+                    // If LargeIcons is true the "LargeIconsSize" value is read from registry,
+                    // else the "IconsSize" value will get read.
+                    // 32x32 pixel icons and above are considered to be "Large".
+                    Procedure ReadValueFromRegistry
+                        Boolean bLargeIcons bPrivateAddingFocusOrg
+                        String sCurrVal sVal
+                        
+                        Get ReadDword of ghoApplication (psRegKey(Self)) C_LargeIcons False to bLargeIcons
+                        If (bLargeIcons = True) Begin 
+                            Get ReadString of ghoApplication (psRegKey(Self)) C_LargeIconsSize "32, 32" to sVal
+                        End    
+                        Else If (bLargeIcons = False) Begin 
+                            Get ReadString of ghoApplication (psRegKey(Self)) (psRegVal(Self)) "24, 24" to sVal
+                        End
+
+                        Set psInitValue                  to sVal   
+                        Get Data_To_Description sVal     to sVal
+                        Get Value                        to sCurrVal         
+
+                        If (sCurrVal <> sVal) Begin
+                            Get pbPrivateAddingFocus to bPrivateAddingFocusOrg 
+                            // This is to not trigger the OnChange event.
+                            Set pbPrivateAddingFocus to True
+                            Set Value to sVal
+                            Set pbPrivateAddingFocus to bPrivateAddingFocusOrg
+                        End
+                    End_Procedure // ReadValueFromRegistry  
+                          
+                    // We also need to override when writing to the registry.      
+                    Procedure WriteValueToRegistry
+                        String sCurrVal
+                        Boolean bLarge     
+                        
+                        Get Value to sCurrVal   
+                        Get Description_To_Data sCurrVal to sCurrVal
+                        Move (not(sCurrVal contains "16" or sCurrVal contains "24")) to bLarge
+                        Send WriteDword of ghoApplication (psRegKey(Self)) C_LargeIcons bLarge
+                        If (bLarge = False) Begin 
+                             Send WriteString of ghoApplication (psRegKey(Self)) (psRegVal(Self)) sCurrVal
+                        End 
+                        If (bLarge = True) Begin 
+                             Send WriteString of ghoApplication (psRegKey(Self)) C_LargeIconsSize sCurrVal
+                        End
+                    End_Procedure // WriteValueToRegistry
+                    
+                End_Object // oToolbarBtnSize_rcf
+
+                Object opeControlStyle_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 13 120
+                    Set Location to 25 75
+                    Set Label to "Button Caption"
+                    Set Entry_State to False
+                    Set Label_Col_Offset to 2
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_ToolbarControlStyle
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "2"
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Text Only"                  xtpButtonCaption
+                        Send Combo_Add_Item "Icon only"                  xtpButtonIcon
+                        Send Combo_Add_Item "Icon and text to the right" xtpButtonIconAndCaption
+                        Send Combo_Add_Item "Icon and text below it"     xtpButtonIconAndCaptionBelow
+                    End_Procedure // Combo_Fill_List
+                
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True 
+                        Delegate Set pbRestartApp to True // Panel property.
+                    End_Procedure                
+                    
+                    Procedure WriteValueToRegistry
+                        Integer eControlstyle
+                        Forward Send WriteValueToRegistry
+                        Get ReadDword of ghoApplication C_Preferences C_ToolbarControlStyle xtpButtonIcon to eControlstyle
+                        Set peToolBarControlStyle of ghoValueObject to eControlstyle
+                    End_Procedure // WriteValueToRegistry
+                
+                End_Object // opeControlStyle_rcf
+
+                Object opeBarPosition_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 39 74
+                    Set Size to 13 120
+                    Set Label_Col_Offset to 2
+                    Set Label_Justification_Mode to jMode_Right
+                    Set Label to "Posi‡Æo em tela"
+                    Set Entry_State to False
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_BarPosition
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "0"
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True  
+                    End_Procedure
+
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Top"      xtpBarTop       // 0
+                        Send Combo_Add_Item "Bottom"   xtpBarBottom    // 1
+                        Send Combo_Add_Item "Left"     xtpBarLeft      // 2
+                        Send Combo_Add_Item "Right"    xtpBarRight     // 3
+                        Send Combo_Add_Item "Floating" xtpBarFloating  // 4
+                    End_Procedure // Combo_Fill_List
+                
+                End_Object // opeBarPosition_rcf
+
+            End_Object // oToolbarGroup
+
+            Object oMenuAndToolbarGroup is a dbGroup
+                Set Size to 73 204
+                Set Location to 166 13
+                Set Label to "Menus and Toolbars"
+                Set Typeface to "Tahoma"
+                Set FontSize to 14 0
+                Set peAnchors to anTopLeftRight
+
+                Object oVisualTheme_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 13 120
+                    Set Location to 13 75
+                    Set Label to "Tema"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_CommandBarsOptions
+                    Set psRegVal to C_Theme
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "3" // xtpThemeNativeWinXP = current skin theme
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Office 2000"            xtpThemeOffice2000
+                        Send Combo_Add_Item "Office XP"              xtpThemeOfficeXP
+                        Send Combo_Add_Item "Office 2003"            xtpThemeOffice2003
+                        Send Combo_Add_Item "Use Current Skin Theme" xtpThemeNativeWinXP
+                        Send Combo_Add_Item "Visual Studio 2005"     xtpThemeWhidbey
+                        Send Combo_Add_Item "Office 2007"            xtpThemeOffice2007
+                        Send Combo_Add_Item "Ribbon"                 xtpThemeRibbon 
+                        // For Visual DataFlex 14.1 and above only.  
+                        // There is a very subtle difference compared to the Visual Studio 2005 theme, in that
+                        // the status bar panes have thin borders around them.
+                        #IFDEF (!@ >= 141)
+                            Send Combo_Add_Item "Visual Studio 2008" xtpThemeVisualStudio2008
+                        #ENDIF    
+                    End_Procedure // Combo_Fill_List
+                
+                End_Object // oVisualTheme_cf
+
+                Object oUseDropShadow_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 28 75
+                    Set Size to 13 120
+                    Set Label to "Icon Dropshadow"
+                    Set Label_Justification_Mode to JMode_Right
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set psRegKey to C_CommandBarsOptions
+                    Set psRegVal to C_IconsWithShadow
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "1"
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "No"  0
+                        Send Combo_Add_Item "Yes" 1
+                    End_Procedure // Combo_Fill_List
+                
+                End_Object // oUseDropShadow_rcf
+
+                Object oToolTipStyle_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 43 75
+                    Set Size to 13 120
+                    Set Label to "Estilo do ToolTip"
+                    Set Label_Justification_Mode to JMode_Right
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TooltipStyle
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "5" // 5=xtpToolTipLuna.
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure // OnChange
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Selected Visual Theme Style" -1
+                        Send Combo_Add_Item "Standard"                    xtpToolTipStandard
+                        Send Combo_Add_Item "Balloon"                     xtpToolTipBalloon
+                        Send Combo_Add_Item "Office"                      xtpToolTipOffice
+                        Send Combo_Add_Item "Luna"                        xtpToolTipLuna
+                        Send Combo_Add_Item "Office 2007"                 xtpToolTipOffice2007
+                        Send Combo_Add_Item "Do Not Show Tooltips"        -2
+                    End_Procedure // Combo_Fill_List
+                
+                End_Object // oToolTipStyle_rcf
+
+//                Object oResetToolbar_bn is a Button
+//                    Set Typeface to "Tahoma"
+//                    Set FontSize to 14 0
+//                    Set Size to 14 120
+//                    Set Location to 55 75
+//                    Set Label to "Restore to Original Positions"
+//                    Set peAnchors to anTopLeftRight
+//                
+//                    Procedure OnClick    
+//                        Integer iRetval
+//                        Get YesNo_Box "Any customization made to menus and toolbars will be lost. Continue?" to iRetval
+//                        If (iRetval = MBR_No) Procedure_Return
+//                        // The menu bar needs to be explicitly set to visible again.
+//                        Set pbVisible of ghoMenuBar to True
+//                        Set pbVisible of ghoToolBar to True
+//                        Set Toolbar_State   of (ClientAreaObject(ghoCommandBars)) to True 
+//                        Set Statusbar_State of (ClientAreaObject(ghoCommandBars)) to True
+//                        Send WriteDword     of ghoApplication C_Preferences C_IsTabPagesVisible True
+//                        // I'm not sure this should be done or not... Commented out for now.
+//                        //Send DisplayTabWorkspace of ghoCommandBars 
+//                        Send RestoreLayout  of ghoCommandBars               
+//                    End_Procedure // OnClick
+//                
+//                End_Object // oResetToolbar_bn
+
+            End_Object // oMenuAndToolbarGroup 
+            
+        End_Object // oMenuToolbar_tp
+
+        Object oTabPages_tp is a dbTabPage
+            Set Label to "Tab Pages"
+
+            Object oTabPages_grp is a dbGroup
+                Set Typeface to "Tahoma"
+                Set FontSize to 14 0
+                Set Size to 163 204
+                Set Location to 4 13
+                Set Label to "View Area Tab Pages"
+                Set peAnchors to anTopLeftRight
+
+                Object oTabPagePosition_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 15 120
+                    Set Location to 10 75
+                    Set Label to "Screen Position"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TabPagePosition
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "0" // xtpTabPositionTop
+                    Set peAnchors to anTopLeftRight
+    
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Top"    xtpTabPositionTop      // 0
+                        Send Combo_Add_Item "Bottom" xtpTabPositionBottom   // 2
+                        Send Combo_Add_Item "Left"   xtpTabPositionLeft     // 1
+                        Send Combo_Add_Item "Right"  xtpTabPositionRight    // 3
+                    End_Procedure // Combo_Fill_List
+                
+                End_Object // oTabPagePosition_rcf
+
+                Object oTapShowCloseButtons_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 25 75
+                    Set Size to 13 120
+                    Set Label to "Close Button"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TabShowCloseButtons
+                    Set piRegValType to RMC_Registry_DWord  
+                    Set psDefaultValue to "1" // 1= True
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                        Delegate Set pbRestartApp to True // Panel property.
+                    End_Procedure // OnChange 
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "None, Hide it" 0
+                        Send Combo_Add_Item "Yes, Show it" 1
+                    End_Procedure // Combo_Fill_List
+                End_Object // oTapShowCloseButtons_rcf           
+                
+                Object oTabPageLayoutStyle_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 15 120
+                    Set Location to 40 75
+                    Set Label to "Layout Style"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TabPageLayoutStyle
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "4" // xtpTabLayoutMultiRow
+                    Set peAnchors to anTopLeftRight
+    
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Auto Size"      xtpTabLayoutAutoSize
+                        Send Combo_Add_Item "Size to Fit"    xtpTabLayoutSizeToFit
+                        Send Combo_Add_Item "Fixed"          xtpTabLayoutFixed
+                        Send Combo_Add_Item "Compressed"     xtpTabLayoutCompressed
+                        Send Combo_Add_Item "Multi Row"      xtpTabLayoutMultiRow
+                        Send Combo_Add_Item "Layout Rotated" xtpTabLayoutRotated
+                    End_Procedure // Combo_Fill_List
+                
+                End_Object // oTabPageLayoutStyle_rcf
+            
+                Object oTabAppearanceStyle is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 15 120
+                    Set Location to 55 75
+                    Set Label to "Appearance"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TabAppearanceStyle
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "9" // xtpTabAppearanceVisualStudio2005
+                    Set peAnchors to anTopLeftRight
+    
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Property Page"          xtpTabAppearancePropertyPage
+                        Send Combo_Add_Item "Selected Property Page" xtpTabAppearancePropertyPageSelected
+                        Send Combo_Add_Item "Property Page Flat"     xtpTabAppearancePropertyPageFlat
+                        Send Combo_Add_Item "Property Page 2003"     xtpTabAppearancePropertyPage2003
+                        Send Combo_Add_Item "Buttons"                xtpTabAppearanceStateButtons
+                        Send Combo_Add_Item "Visual Studio"          xtpTabAppearanceVisualStudio
+                        Send Combo_Add_Item "Appearance Flat"        xtpTabAppearanceFlat
+                        Send Combo_Add_Item "Excel"                  xtpTabAppearanceExcel
+                        Send Combo_Add_Item "Visio"                  xtpTabAppearanceVisio
+                        Send Combo_Add_Item "Visual Studio 2005"     xtpTabAppearanceVisualStudio2005
+                        Send Combo_Add_Item "Property Page 2007"     xtpTabAppearancePropertyPage2007
+                    End_Procedure // Combo_Fill_List
+                
+                End_Object // oTabAppearanceStyle_rcf
+
+                Object oTabColorStyle_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Size to 13 120
+                    Set Location to 71 75
+                    Set Label to "Visual Theme"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TabColorStyle
+                    Set piRegValType to RMC_Registry_DWord
+                    Set psDefaultValue to "32" // xtpTabColorOffice2007
+                    Set peAnchors to anTopLeftRight
+    
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "Use Selected Appearance" xtpTabColorDefault
+                        Send Combo_Add_Item "Visual Studio"           xtpTabColorVisualStudio
+                        Send Combo_Add_Item "Office 2003"             xtpTabColorOffice2003
+                        Send Combo_Add_Item "Use Current Skin Theme"  xtpTabColorWinXP
+                        Send Combo_Add_Item "Whidbey"                 xtpTabColorWhidbey
+                        Send Combo_Add_Item "Office 2007"             xtpTabColorOffice2007
+                    End_Procedure // Combo_Fill_List
+                
+                End_Object // oTabColorStyle_rcf
+
+                Object oTapPageShowIcons_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 86 75
+                    Set Size to 13 120
+                    Set Label to "Show Icons"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TabPageShowIcons
+                    Set piRegValType to RMC_Registry_DWord  
+                    Set psDefaultValue to "1" // 1= True
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Integer iItem iCurrent
+
+                        Get Wincombo_Current_Item to iItem                            
+                        Set Enabled_State of oTabPageIconSize_rcf to (iItem = 1)
+                                               
+                        Get ReadDword of ghoApplication (psRegKey(Self)) (psRegVal(Self)) 1 to iCurrent
+                        If (iItem <> iCurrent) Set Enabled_State of oApply_btn to True
+                    End_Procedure // OnChange 
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "No" 0
+                        Send Combo_Add_Item "Yes" 1
+                    End_Procedure // Combo_Fill_List
+                End_Object // oTapPageShowIcons_rcf
+
+                Object oTabPageIconSize_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 101 75
+                    Set Size to 13 120
+                    Set Label to "Icon Size"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TabPageIconsSize
+                    Set piRegValType to RMC_Registry_String  
+                    Set psDefaultValue to "16, 16"
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                    End_Procedure      
+                    
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "16x16 pixels" "16, 16"
+                        Send Combo_Add_Item "24x24 pixels" "24, 24"
+                        Send Combo_Add_Item "32x32 pixels" "32, 32"
+                    End_Procedure // Combo_Fill_List
+                End_Object // oTabPageIconSize_rcf
+
+                Object oTapEnableGroups_rcf is a cRegistryComboForm
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Location to 116 75
+                    Set Size to 13 120
+                    Set Label to "Enable Groups"
+                    Set Label_Col_Offset to 2
+                    Set Entry_State to False
+                    Set Label_Justification_Mode to JMode_Right
+                    Set psRegKey to C_Preferences
+                    Set psRegVal to C_TabEnableGroups
+                    Set piRegValType to RMC_Registry_DWord  
+                    Set psDefaultValue to "0" // 0= False
+                    Set peAnchors to anTopLeftRight
+
+                    Procedure Combo_Fill_List
+                        Send Combo_Add_Item "No" 0
+                        Send Combo_Add_Item "Yes" 1
+                    End_Procedure // Combo_Fill_List
+
+                    Procedure OnChange
+                        Set Enabled_State of oApply_btn to True
+                        Delegate Set pbRestartApp to True // Panel property.
+                    End_Procedure // OnChange 
+
+                    Procedure WriteValueToRegistry
+                        Forward Send WriteValueToRegistry
+                        // This is used to not save view sizes and locations when
+                        // grouping is enabled.
+                        Set pbEnableGroups of ghoApplication to True    
+                    End_Procedure // WriteValueToRegistry
+                    
+                End_Object // oTapEnableGroups_rcf
+
+                Object oTextBox2 is a TextBox
+                    Set Auto_Size_State to False
+                    Set Size to 26 178
+                    Set Location to 132 19
+                    Set Label to "See also the Help menu - Video Clips submenu how to work with Tab Page Groups."
+                    Set Typeface to "Tahoma"
+                    Set FontSize to 14 0
+                    Set Justification_Mode to JMode_Left
+                    Set peAnchors to anTopLeftRight
+                End_Object // oTextBox2
+
+            End_Object // oTabPages_grp
+            
+        End_Object // oTabPages_tp
+                       
+    End_Object // oPropertiesDbTabDialog
+
+    Object oOk_btn is a Button
+        Set Size to 17 48
+        Set Location to 254 83
+        Set Label to "&OK"
+        Set Default_State to True
+        Set peAnchors to anBottomLeft
+        Set Typeface to "Tahoma"
+        Set FontSize to 14 0
+        Set Bitmap to "ok.bmp"
+
+        Procedure OnClick
+            Send DoApplyChanges
+            Send Close_Panel
+        End_Procedure // OnClick
+    End_Object // oOk_btn     
+                                     
+    // We need to augment Deactivating for the case that the user presses the 
+    // escape key when in some control. That would bypass the Close_Panel
+    // procedure, but Deactivating is always called when the panel is about
+    // to be closed. We use it to reset any changes if the Apply or OK
+    // buttons were not pressed.                                     
+    Procedure Deactivating Returns Integer
+        Forward Send Deactivating 
+        Boolean bApplied
+        Get pbApplied to bApplied  // Panel property.
+        // bApplied is only true if the Apply or OK button was pressed. 
+        // ResetChanges is send to all child-controls to do their 'thing', if user never pressed
+        // the Apply or OK button. This will reset values to what they were before
+        // the panel was activated. This is how a property panel should work according
+        // to Microsoft's design guide-lines:
+        // 1) Nothing should happen before the Apply or OK button is pressed.
+        // 2) If the Apply button is pressed the panel should not close, just do changes.
+        // 3) If the OK button is pressed the panel should close after effecting changes.
+        // 4) If the cancel button or key or upper right corner was clicked without
+        //    the user actually clicked the Apply button - all values should be reset
+        //    to what they were prior to activating the panel.
+        If (bApplied = False) Begin
+            Broadcast Recursive Send ResetChanges 
+        End
+        Set Enabled_State of oApply_btn to False
+        Set pbApplied to False  // Reset it for next time panel is activated.
+    End_Procedure // Deactivating             
+                            
+    Object oCancel_btn is a Button
+        Set Size to 17 48
+        Set Label to "&Cancel"
+        Set Location to 254 137
+        Set peAnchors to anBottomLeft
+        Set Typeface to "Tahoma"
+        Set FontSize to 14 0
+        Set Bitmap to "cancelar.bmp"
+        Procedure OnClick 
+            Send Close_Panel
+        End_Procedure
+    End_Object // oCancel_btn
+
+    Object oApply_btn is a Button
+        Set Size to 17 48
+        Set Label to "&Aplicar"
+        Set Location to 254 191
+        Set Enabled_State to False
+        Set peAnchors to anBottomRight
+        Set Typeface to "Tahoma"
+        Set FontSize to 14 0
+        Set Bitmap to "aplicar.bmp"
+        Procedure OnClick 
+            Send DoApplyChanges
+        End_Procedure // OnClick  
+    End_Object // oApply_btn
+
+    // Custom array sort for the tSkinInformation struct array.
+    // Used by LoadSkins message to sort the skin array alphabetically after it has been loaded.
+    // Why?  
+    // First of all, structs can't be used with the standard SortArray function, that is why we need to
+    // create a custom sort algorithm.
+    // Secondly the list of skins would else be sorted in the alphabetical order by the file names.
+    // However, it is not always the case that the skin description (sName) is the same as the file name.
+    // If it isn't (which is almost always the case if you have many skin files) the list will look
+    // randomly ordered. This custom sort will take of that. 
+    Function SkinSort tSkinInformation sDescription tSkinInformation sSearchDescription Returns Integer
+        Integer iRetVal
+        If (sDescription.sName > sSearchDescription.sName) Function_Return (GT)
+        If (sDescription.sName < sSearchDescription.sName) Function_Return (LT)
+        Function_Return (EQ)
+    End_Function  // SkinSort
+
+    // Load all skins. We will only look for skins in expected
+    // directory which is the Programs folder. 
+    // Procedure is called from procedure Activating.
+    // Important: When loading skins they will be sorted alphabetically. (See Skinsort function above).
+    // This is not the case with 'standard' VDF behaviour.
+    Procedure LoadSkins
+        tSkinInformation[] SkinsArray
+        
+        If (ghoSkinFramework > 0) Begin
+            Get EnumerateSkins of ghoSkinFramework "" True   to SkinsArray
+            Move (SortArray(SkinsArray, Self, get_SkinSort)) to SkinsArray
+
+            Set pSkins to SkinsArray
+            Send AddSkinsToList of oSkinsList SkinsArray
+        End // If (ghoSkinFramework > 0) Begin
+
+    End_Procedure // LoadSkins
+
+    // Called from procedure Activating.                        
+    Procedure ShowCurrentSkin
+        String sFile sIni
+
+        If (ghoSkinFramework > 0) Begin
+            Get psSkinFile of ghoSkinFramework to sFile
+            Move (Replace(".msstyles", sFile, "")) to sFile
+            Move (Replace(".cjstyles", sFile, "")) to sFile
+            Get psSkinIni  of ghoSkinFramework to sIni
+            If (sFile = "") Begin
+                Move "None" to sFile
+            End
+            Else If (sIni <> "") Begin
+                Move (sFile * "-" * sIni) to sFile
+            End
+        End // If (ghoSkinFramework > 0) Begin
+        Else Begin
+            Move "Error - no skinning object" to sFile
+        End
+        
+        Set Value of oCurrentSkin_fm to sFile
+    End_Procedure // ShowCurrentSkin
+    
+    // Called from procedure DoApplyChanges.                        
+    Procedure ApplyCurrentSkin
+        Integer iCurrent
+        tSkinInformation[] SkinsArray
+
+        If ghoSkinFramework Begin
+
+            Set psSkinFile of ghoSkinFramework to ""
+            Set psSkinIni  of ghoSkinFramework to ""
+            Get Current_Item of oSkinsList to iCurrent
+            If (iCurrent > 0) Begin
+                Get pSkins to SkinsArray
+                // -1 because we have a 'none' item in the list object that shows skins.
+                Set psSkinFile of ghoSkinFramework to SkinsArray[iCurrent-1].sSkinfile
+                Set psSkinIni  of ghoSkinFramework to SkinsArray[iCurrent-1].sSkinIni
+            End
+            Send ApplySkin of ghoSkinFramework
+        End
+        Send ShowCurrentSkin
+    End_Procedure // ApplyCurrentSkin
+
+    // When dialog first is activated, fill the list of skins.
+    // It also sets the Apply button to false
+    Procedure Activating Returns Integer
+        Integer iRetval
+        Boolean bFirstLoad 
+        
+        Forward Get msg_Activating to iRetVal           
+        Set Enabled_State of oApply_btn to False
+        Get pbFirstLoad to bFirstLoad
+        If (bFirstLoad = False) Procedure_Return
+        Send LoadSkins 
+        Send ShowCurrentSkin                    
+        Set pbFirstLoad to False 
+
+        Procedure_Return iRetVal
+
+    End_Procedure // Activating       
+    
+    On_Key Key_Alt+Key_O   Send KeyAction of oOk_btn
+    On_Key Key_Ctrl+Key_O  Send KeyAction of oOk_btn
+    On_Key Key_Alt+Key_C   Send KeyAction of oCancel_btn
+    On_Key Key_Ctrl+Key_C  Send KeyAction of oCancel_btn
+    On_Key kCancel         Send KeyAction of oCancel_btn
+    On_Key Key_Alt+Key_A   Send KeyAction of oApply_btn
+    On_Key Key_Ctrl+Key_A  Send KeyAction of oApply_btn
+
+End_Object // oProperties

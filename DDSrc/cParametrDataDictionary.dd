@@ -1,0 +1,33 @@
+Use Datadict.pkg
+
+Declare_Datafile PARAMETR
+
+Class cParametrDataDictionary is a DataDictionary
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        
+        Declare_Datafile PARAMETR
+        
+        Set Main_file to PARAMETR.File_Number
+
+        Set Foreign_Field_Option DD_KEYFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_DEFAULT DD_DISPLAYONLY to True
+
+        Set Field_Mask_Type Field PARAMETR.ULT_ID_USU to Mask_Numeric_Window
+
+        Set Field_Mask_Type Field PARAMETR.ULT_ID_ESP to Mask_Numeric_Window
+
+        Set Field_Mask_Type Field PARAMETR.ULT_ID_MED to Mask_Numeric_Window
+
+        Set Field_Mask_Type Field PARAMETR.ULT_ID_LOC to Mask_Numeric_Window
+
+        Set Field_Mask_Type Field PARAMETR.ULT_ID_PAC to Mask_Numeric_Window
+
+        Set Field_Mask_Type Field PARAMETR.ULT_ID_AGE to Mask_Numeric_Window
+
+    End_Procedure
+
+End_Class

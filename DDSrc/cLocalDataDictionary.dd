@@ -1,0 +1,45 @@
+Use DataDict.pkg
+
+Declare_Datafile LOCAL
+Declare_Datafile PARAMETR
+
+Register_Object Local_sl
+
+Class cLocalDataDictionary is a DataDictionary
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        
+        Open LOCAL
+        Open PARAMETR
+        
+        Set Main_file to LOCAL.File_Number
+
+        Set Add_System_File to PARAMETR.File_Number DD_Lock_On_All
+
+        Set Foreign_Field_Option DD_KEYFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_AUTOFIND to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_DEFAULT DD_DISPLAYONLY to True
+
+        Set Field_Option Field LOCAL.ID DD_AUTOFIND to True
+        Set Field_Auto_Increment Field LOCAL.ID to File_Field PARAMETR.ULT_ID_LOC
+        Set Key_Field_State Field LOCAL.ID to True
+        Set Field_Mask_Type Field LOCAL.ID to Mask_Numeric_Window
+        Set Field_Prompt_Object Field LOCAL.ID to Local_sl
+
+        Set Field_Option Field LOCAL.DESCRICAO DD_CAPSLOCK to True
+        Set Field_Prompt_Object Field LOCAL.DESCRICAO to Local_sl
+
+        Set Field_Option Field LOCAL.ENDERECO DD_CAPSLOCK to True
+
+    End_Procedure
+
+End_Class
+
+#IFDEF Is$WebApp
+#ELSE
+Use Local.sl
+#ENDIF

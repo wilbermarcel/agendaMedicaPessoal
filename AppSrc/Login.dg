@@ -1,0 +1,238 @@
+Use DFClient.pkg
+Use cUsuarioDataDictionary.dd
+Use DFEntry.pkg
+Use Windows.pkg
+Use Dfabout.pkg
+
+Object oLogin is a dbModalPanel
+    Object oUsuario_DD is a cUsuarioDataDictionary
+        
+        Set Validate_Deos_Only_State       to True
+        Set Validate_Save_Structure_Mode   to Dd_Validate_Structure_Never
+        Set Validate_Delete_Structure_Mode to Dd_Validate_Structure_Never
+        
+        Procedure Update
+            Forward Send Update
+            String sSenha
+            Get Value of (FSenhaNova(gSenha(Self))) to sSenha
+            Move sSenha to USUARIO.SENHA            
+        End_Procedure
+        
+    End_Object
+
+    Set Main_DD to oUsuario_DD
+    Set Server to oUsuario_DD
+
+    Set Locate_Mode to Center_On_Panel
+    Set Minimize_Icon to False
+    Set Label to "Login"
+    Set Size to 133 329
+    Set Location to 19 36
+    Set Color to 14089726
+    Set Border_Style to Border_None
+    
+    Object oContainer3d1 is a dbContainer3d
+        Set Size to 121 311
+        Set Location to 5 10
+        Set Color to 10354687
+        
+        Object oUSUARIO_ID is a dbForm
+            Entry_Item USUARIO.ID
+            Set Location to 11 44
+            Set Size to 13 43
+            Set Label to "Usu†rio:"
+            Set Label_Col_Offset to 2
+            Set Label_Justification_Mode to JMode_Right
+            Set Form_Border to Border_Normal
+            Set Label_Color to 10354687
+        End_Object
+        Object oForm1 is a Form
+            Set Size to 13 42
+            Set Location to 30 44
+            Set Password_State to True
+            Set Label to "Senha:"
+            Set Label_Col_Offset to 2
+            Set Label_Justification_Mode to JMode_Right
+            Set Form_Border to Border_Normal
+            Set Label_Color to 10354687
+        End_Object
+        Object gSenha is a Group
+            Set Size to 59 207
+            Set Location to 53 19
+            Set Label to "Alteraá∆o se Senha"
+            Set Color to 10354687
+    
+            Object FSenhaAtual is a Form
+                Set Label to "Senha Atual:"
+                Set Size to 13 70
+                Set Location to 11 64
+                Set Label_Col_Offset to 2
+                Set Label_Justification_Mode to jMode_Right
+                Set password_state to True
+                Set Form_Border to Border_Normal
+                Set Form_Margin item 0 to 15
+                Set Label_Color to 10354687
+            End_Object
+    
+            Object FSenhaNova is a Form
+                Set Label to "Nova Senha:"
+                Set Size to 13 70
+                Set Location to 25 64
+                Set Label_Col_Offset to 2
+                Set Label_Justification_Mode to jMode_Right
+                Set password_state to True
+                Set Form_Border to Border_Normal
+                Set Label_Color to 10354687
+                Set Form_Margin item 0 to 15
+            End_Object
+    
+            Object fSenhaNovaConf is a Form
+                Set Label to "Confirme Senha:"
+                Set Size to 13 70
+                Set Location to 39 64
+                Set Label_Col_Offset to 2
+                Set Label_Justification_Mode to jMode_Right
+                Set password_state to True
+                Set Form_Border to Border_Normal
+                Set Label_Color to 10354687
+                Set Form_Margin item 0 to 15
+            End_Object
+    
+            Object oConfirmar_bn is a Button
+                Set Label to "&Trocar Senha"
+                Set Bitmap to "Confirmar.bmp"
+                Set Size to 17 48
+                Set Location to 35 149
+        
+                Procedure onclick
+                    String sSenhaAtual sNovaSenha sNovaSenhaConf
+                    Get Value of FSenhaAtual to sSenhaAtual
+                    Move (Trim(sSenhaAtual)) to sSenhaAtual
+                    If (sSenhaAtual="") Begin
+                        Send UserError "Digite a Senha Atual!" "ERRO"
+                        Send Activate to FSenhaAtual
+                        Procedure_Return
+                    End
+                    If (sSenhaAtual<>USUARIO.SENHA) Begin
+                        Send UserError "Senha Atual Inv†lida!" "ERRO"
+                        Send Activate to FSenhaAtual
+                        Procedure_Return
+                    End
+                    Get Value of FSenhaNova     to sNovaSenha
+                    Get Value of fSenhaNovaConf to sNovaSenhaConf
+                    Move (Trim(sNovaSenha    )) to sNovaSenha
+                    Move (trim(sNovaSenhaConf)) to sNovaSenhaConf
+                    If (sNovaSenha="") Begin
+                        Send UserError "Digite a Nova Senha!" "ERRO"
+                        Send Activate to FSenhaNova
+                        Procedure_Return
+                    End
+                    If (sNovaSenha<>sNovaSenhaConf) Begin
+                        Send UserError "As novas senhas n∆o conferem, tente novamente!" "ERRO"
+                        Send Activate to FSenhaNova
+                        Procedure_Return
+                    End
+                    If (sSenhaAtual=sNovaSenha) Begin
+                        Send UserError "A nova senha n∆o pode ser igual a senha atual!" "ERRO"
+                        Send Activate to FSenhaNova
+                        Procedure_Return
+                    End
+                    Send Request_Save of (Main_DD(Self))
+                    If (not(Err)) Begin
+                        Send Info_Box "Senha Atualizada com Sucesso!" "INFORMAÄ«O"
+                        Set Size of oLogin        to 67 329
+                        Set Size of oContainer3d1 to 55 311
+                        Send Activate to oForm1
+                        Send EnableObjects (False)
+                        Send LimpaFormSenhas
+                    End
+                End_Procedure
+            End_Object
+        End_Object
+        Object oUSUARIO_NOME is a dbForm
+            Entry_Item USUARIO.NOME
+            Set Location to 11 90
+            Set Size to 13 136
+            Set Enabled_State to False
+            Set Form_Border to Border_Normal
+            Set Label_Color to clWhite
+            Set Prompt_Button_Mode to PB_PromptOff
+        End_Object
+        Object oOK_btn is a Button
+            Set Size to 17 48
+            Set Label    to "&OK"
+            Set Location to 9 241
+            Set peAnchors to anNone
+            Set Bitmap to "ok.bmp"
+            Set Default_State to True
+    
+            Procedure OnClick
+                String sSenha
+                Get value of oForm1 to sSenha
+                If (USUARIO.Recnum=0) Begin
+                    Send UserError "Entre com o operador" "ERRO"
+                    Procedure_Return     
+                End
+                If (sSenha<>USUARIO.SENHA) Send Stop_Box "SENHA INVµLIDA." "ERRO:"
+                Else Begin
+                    Move 1            to i$Ok
+                    Move USUARIO.ID   to i$User
+                    Move USUARIO.NOME to s$User
+                    Send close_panel
+                End
+            End_Procedure
+        End_Object
+        
+        Object oTrocarSenha_bn is a Button
+            Set Label to "&Trocar Senha"
+            Set Bitmap to "alterar_senha.bmp"
+            Set Size to 17 48
+            Set Location to 29 240
+    
+            Procedure onclick
+                String sSenha
+                Get value of oForm1 to sSenha
+                If (USUARIO.Recnum=0) Begin
+                    Send UserError "Entre com o Usu†rio para poder alterar a senha!" "ERRO"
+                    Procedure_Return
+                End
+                If (sSenha<>USUARIO.SENHA) Send Stop_Box "SENHA INVµLIDA." "ERRO:"
+                Set Size of oLogin        to 133 329
+                Set Size of oContainer3d1 to 121 311
+                Send EnableObjects (True)
+                Send Activate to (FSenhaAtual(gSenha(Self)))
+            End_Procedure
+        End_Object
+    End_Object
+    
+    Procedure Entering_Scope Returns Integer
+        Integer iFail
+        Forward Get msg_Entering_Scope to iFail
+    
+        If (not(iFail)) Begin
+            Set Size of oLogin        to 67 329
+            Set Size of oContainer3d1 to 55 311
+            Send EnableObjects (False)
+        End
+                
+        Procedure_Return iFail
+    End_Procedure
+    
+    Procedure EnableObjects Boolean bEnabled
+        Set Enabled_State of (FSenhaAtual   (gSenha(Self))) to bEnabled
+        Set Enabled_State of (FSenhaNova    (gSenha(Self))) to bEnabled
+        Set Enabled_State of (fSenhaNovaConf(gSenha(Self))) to bEnabled
+        Set Enabled_State of (oConfirmar_bn (gSenha(Self))) to bEnabled
+        Set Visible_State of  gSenha                        to bEnabled
+    End_Procedure
+    
+    Procedure LimpaFormSenhas
+        Set Value of (FSenhaAtual   (gSenha(Self))) to ""
+        Set Value of (FSenhaNova    (gSenha(Self))) to ""
+        Set Value of (fSenhaNovaConf(gSenha(Self))) to ""
+    End_Procedure
+
+    
+    On_Key Key_Alt+Key_O Send KeyAction of oOk_btn
+    On_Key Key_Alt+Key_C Send KeyAction of oCancel_bn
+End_Object

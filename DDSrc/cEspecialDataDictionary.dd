@@ -1,0 +1,47 @@
+Use DataDict.pkg
+
+Declare_Datafile ESPECIAL
+Declare_Datafile MEDEXAME
+Declare_Datafile PARAMETR
+
+Register_Object Especial_sl
+
+Class cEspecialDataDictionary is a DataDictionary
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        
+        Open ESPECIAL
+        Open MEDEXAME
+        Open PARAMETR
+        
+        Set Main_file to ESPECIAL.File_Number
+
+        Set Add_System_File to PARAMETR.File_Number DD_Lock_On_All
+
+        Set Add_Client_File to MEDEXAME.File_Number
+
+        Set Foreign_Field_Option DD_KEYFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_AUTOFIND to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_DEFAULT DD_DISPLAYONLY to True
+
+        Set Field_Option Field ESPECIAL.ID DD_AUTOFIND to True
+        Set Field_Auto_Increment Field ESPECIAL.ID to File_Field PARAMETR.ULT_ID_ESP
+        Set Key_Field_State Field ESPECIAL.ID to True
+        Set Field_Mask_Type Field ESPECIAL.ID to Mask_Numeric_Window
+        Set Field_Prompt_Object Field ESPECIAL.ID to Especial_sl
+
+        Set Field_Option Field ESPECIAL.DESCRICAO DD_CAPSLOCK to True
+        Set Field_Prompt_Object Field ESPECIAL.DESCRICAO to Especial_sl
+
+    End_Procedure
+
+End_Class
+
+#IFDEF Is$WebApp
+#ELSE
+Use Especial.sl
+#ENDIF

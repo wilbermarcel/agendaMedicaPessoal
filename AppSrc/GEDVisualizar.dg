@@ -1,0 +1,31 @@
+Use Windows.pkg
+Use cComWebBrowser.pkg
+
+Object oGEDVisualizar is a ModalPanel
+    Set Size to 219 357
+    Set Label to "GED (Gerenciador Eletr“nico de Documentos)"
+    Set piMinSize to 89 211
+    Set Location to 2 2
+    Set Border_Style To Border_Thick
+
+    Object oComWebBrowser1 is a cComWebBrowser
+        
+        Embed_ActiveX_Resource 
+        TAAAAFFEAAAHLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAAQAAAODQVwBzNc8RrmkIACsuEmIIAAAAAAAAAEwAAAABFAIAAAAAAMAAAAAAAABG
+        gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAA.
+        End_Embed_ActiveX_Resource 
+        Set Size to 204 343
+        Set Location to 7 8
+        Set peAnchors to anAll
+
+    End_Object
+    
+    Procedure Entering_Scope Returns Integer
+        String sUrl
+        If (AGENDA.GED="") Move ("about:blank") to sUrl
+        Else               Move AGENDA.GED      to sUrl
+        Send ComNavigate of oComWebBrowser1 sUrl 0 0 0 0 0 
+        Set Label to ("Agenda: " + String(AGENDA.ID) + " - GED (Gerenciador Eletr“nico de Documentos)")
+    End_Procedure
+
+End_Object

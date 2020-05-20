@@ -1,0 +1,10 @@
+[Header]
+Mask=*.*
+SubDirectories=1
+Location=C:\Users\Wilber\Documents\Visual DataFlex Projects\SistemaAgendamentoMedicoPessoalv16\IdeSrc\Wilber_FindInFiles.dsk
+[C:\Users\Wilber\Documents\Visual DataFlex Projects\SistemaAgendamentoMedicoPessoalv16\AppSrc]
+IsEnabled=1
+[C:\Users\Wilber\Documents\Visual DataFlex Projects\SistemaAgendamentoMedicoPessoalv16\DdSrc]
+IsEnabled=1
+[C:\Users\Wilber\Documents\Visual DataFlex Projects\SistemaAgendamentoMedicoPessoalv16\AppHtml]
+IsEnabled=1

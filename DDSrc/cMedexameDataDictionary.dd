@@ -1,0 +1,53 @@
+Use DataDict.pkg
+
+Declare_Datafile MEDEXAME
+Declare_Datafile ESPECIAL
+Declare_Datafile PARAMETR
+Declare_Datafile AGENDA
+
+Register_Object Medexame_sl
+
+Class cMedexameDataDictionary is a DataDictionary
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        
+        Open MEDEXAME
+        Open ESPECIAL
+        Open PARAMETR
+        Open AGENDA
+        
+        Set Main_file to MEDEXAME.File_Number
+
+        Set Add_Server_File to ESPECIAL.File_Number
+
+        Set Add_Client_File to AGENDA.File_Number
+
+        Set Add_System_File to PARAMETR.File_Number DD_Lock_On_All
+
+        Set Foreign_Field_Option DD_KEYFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_DEFAULT DD_DISPLAYONLY to True
+
+        Set Field_Option Field MEDEXAME.ID DD_AUTOFIND to True
+        Set Key_Field_State Field MEDEXAME.ID to True
+        Set Field_Auto_Increment Field MEDEXAME.ID to File_Field PARAMETR.ULT_ID_MED
+        Set Field_Mask_Type Field MEDEXAME.ID to Mask_Numeric_Window
+        Set Field_Prompt_Object Field MEDEXAME.ID to Medexame_sl
+
+        Set Field_Option Field MEDEXAME.NOME DD_CAPSLOCK to True
+        Set Field_Prompt_Object Field MEDEXAME.NOME to Medexame_sl
+
+        Set Field_Mask_Type Field MEDEXAME.ID_ESP to Mask_Numeric_Window
+
+        Set Field_Mask_Type Field MEDEXAME.ID_LOC to Mask_Numeric_Window
+
+    End_Procedure
+
+End_Class
+
+#IFDEF Is$WebApp
+#ELSE
+Use Medexame.sl
+#ENDIF

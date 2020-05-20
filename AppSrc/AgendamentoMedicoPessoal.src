@@ -1,0 +1,138 @@
+Use DFAllEnt.pkg
+Use cCJSkinFramework.pkg 
+Use Winprint2.pkg
+Use cIniFile.pkg
+Use SymDef.pkg
+Use cHighLightAll.pkg
+
+Object oApplication is a cApplication
+    Set peHelpType to htHtmlHelp
+    Set psAutoOpenWorkspace to "Config.ws"
+    Set pbPreserveEnvironment to True
+    
+    Property Boolean pbEnableGroups False
+End_Object
+
+Object oIniFileAbaco is a cIniFile
+    Function PrimaryDataPath Returns String
+        String sDataPath sPrimaryDataPath
+        Get psProgramPath of (phoWorkspace(ghoApplication))             to sDataPath
+        Get PathAtIndex   of (phoWorkspace(ghoApplication)) sDataPath 1 to sPrimaryDataPath
+        Function_Return sPrimaryDataPath
+    End_Function
+    Set psFileName to (PrimaryDataPath(Self) +"\Config.ini")
+End_Object
+    
+Object oSkin is a cCJSkinFramework
+    
+    Function SkinPath Returns String
+        String sPath sPaths
+        Handle hoWorkspace
+        If ghoApplication ;
+            Get ReadString of oIniFileAbaco "arquivos" "skins" "" to sPath
+        Else Error DFERR_PROGRAM C_$ApplicationObjectNotCreated
+        Function_Return sPath
+    End_Function
+    
+    Set psSkinFile to "Vista Ultimate.cjstyles"
+    Set psSkinIni to "NormalBlack32.ini"
+    Set pbLoadPreference to (pbPreserveEnvironment(ghoApplication))
+End_Object 
+
+Global_Variable Handle ghoMainPanel 
+Global_Variable Handle ghoValueObject  
+
+Object oValueObject is a cObject
+    Move Self to ghoValueObject   
+    Property Integer peMenuControlStyle    xtpButtonCaptionAndDescription
+    Property Integer peToolBarControlStyle xtpButtonIconAndCaptionBelow//xtpButtonIcon
+    
+    Procedure OnStartup
+        Integer iState
+        Get ReadDword of ghoApplication C_Preferences C_MenubarControlStyle (peMenuControlStyle(Self)) to iState//xtpButtonCaptionAndDescription to iState
+        Set peMenuControlStyle    to iState    
+        Get ReadDword of ghoApplication C_Preferences C_ToolbarControlStyle (peToolBarControlStyle(Self)) to iState//xtpButtonIconAndCaptionBelow to iState
+        Set peToolBarControlStyle to iState 
+    End_Procedure // OnStartup
+    Send OnStartup
+End_Object
+
+Integer i$Ok i$User
+String  s$User
+
+Object Main is a Panel
+    Move Self to ghoMainPanel
+    
+    Use _cCrystal.pkg
+    Use cHighLightAll.pkg
+    Use cDbCJGridSelectColumn.pkg
+
+    Set Label to "Agendamento M‚dico Pessoal"
+    
+    Property String  psNomeProgramaS "Agendamento M‚dico Pessoal"
+    Property Boolean pbBotoesSD (True)
+    Property String  psGED ""
+
+    Use menu_principal.mn
+    
+    Object Client_Area is a AppClientArea
+        Set Color to 14089726
+        Use CarregaStatus.pkg
+    
+        Move 25 to iAvanca
+        
+        If ghoStatusPanel Begin
+            Send Initialize_StatusPanel to ghoStatusPanel "Aguarde o processo para carregar o programa" "Carregando..." "" "Update.avi"
+            Send Start_StatusPanel to ghoStatusPanel
+        End
+        
+        If ghoStatusPanel Send Update_StatusPanel to ghoStatusPanel ""
+        Use Local_norelate.sl
+        Use CadUsuario.vw
+        If ghoStatusPanel Send Update_StatusPanel to ghoStatusPanel ""
+        Use CadEspecialidade.vw
+        Use CadLocal.vw
+        If ghoStatusPanel Send Update_StatusPanel to ghoStatusPanel ""
+        Use CadPaciente.vw
+        Use CadMedicoExame.vw
+        Use GEDVisualizar.dg
+        Use CadAgenda.vw
+        If ghoStatusPanel Send Update_StatusPanel to ghoStatusPanel ""
+        Use Parametro.vw
+        Use ConsAgenda.vw
+        If ghoStatusPanel Send Update_StatusPanel to ghoStatusPanel ""
+        Sleep 1
+        
+        Use Properties.dg
+        On_Key Key_Ctrl+Key_P Send Popup to oProperties
+
+        If ghoStatusPanel ;
+            Send Stop_StatusPanel of ghoStatusPanel
+            
+        On_Key Key_Ctrl+Key_R Send RestoreLayout of oMainMenuAndToolbar
+
+    End_Object
+    
+    Procedure Activate_PrinterSetup Global
+        Integer iStatus
+        Boolean bActiveViewer bOk
+    
+        Get ArePrintersInstalled of ghoWinPrint2 to bOk
+        If (bOk = False) Begin
+            Error DFERR_WINPRINT C_$NoInstalledPrinters
+            Procedure_Return
+        End
+        Send DFClearDoc to ghoWinPrint2
+        Get DFPrintSetupDialog of ghoWinPrint2 to bOk
+    End_Procedure 
+    
+    On_Key Key_Ctrl+Key_I Send Activate_PrinterSetup
+    On_Key Key_Ctrl+Key_B Send Activate_oCadAgenda
+
+End_Object
+
+Use Login.dg
+Send Popup_Modal to (oLogin(Self))
+If (i$ok=0) Send exit_application
+
+Start_UI

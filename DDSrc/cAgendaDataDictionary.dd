@@ -1,0 +1,85 @@
+Use DataDict.pkg
+
+Declare_Datafile AGENDA
+Declare_Datafile PARAMETR
+Declare_Datafile MEDEXAME
+Declare_Datafile PACIENTE
+
+Object FL_STATUS_VT is a DescriptionValidationTable
+    Procedure Fill_List
+        Forward Send Fill_List
+        Send Add_Table_Value "M" "Marcado"
+        Send Add_Table_Value "A" "Agendar"
+        Send Add_Table_Value "S" "Conclu¡do"
+        Send Add_Table_Value "C" "Cancelado"
+    End_Procedure
+End_Object
+
+Register_Object Agenda_sl
+
+Class cAgendaDataDictionary is a DataDictionary
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        
+        Open AGENDA
+        Open PARAMETR
+        Open MEDEXAME
+        oPEN PACIENTE
+        
+        Set Main_file to AGENDA.File_Number
+
+        Set Add_Server_File to MEDEXAME.File_Number
+        Set Add_Server_File to PACIENTE.File_Number
+
+        Set Add_System_File to PARAMETR.File_Number DD_Lock_On_All
+
+        Set Foreign_Field_Option DD_KEYFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_AUTOFIND to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_DEFAULT DD_DISPLAYONLY to True
+
+        Set Field_Option Field AGENDA.ID DD_AUTOFIND to True
+        Set Key_Field_State Field AGENDA.ID to True
+        Set Field_Auto_Increment Field AGENDA.ID to File_Field PARAMETR.ULT_ID_AGE
+        Set Field_Mask_Type Field AGENDA.ID to Mask_Numeric_Window
+        Set Field_Prompt_Object Field AGENDA.ID to Agenda_sl
+
+        Set Field_Mask_Type Field AGENDA.ID_MEDEX to Mask_Numeric_Window
+
+        Set Field_Mask_Type Field AGENDA.ID_PAC to Mask_Numeric_Window
+
+        Set Field_Mask_Type Field AGENDA.DATA to Mask_Date_Window
+        Set Field_Prompt_Object Field AGENDA.DATA to Agenda_sl
+
+        Set Field_Option Field AGENDA.HORA DD_CAPSLOCK to True
+        Set Field_Mask Field AGENDA.HORA to "##:##"
+        Set Field_Prompt_Object Field AGENDA.HORA to Agenda_sl
+
+        Set Field_Option Field AGENDA.FL_STATUS DD_CAPSLOCK to True
+        Set Field_Value_Table Field AGENDA.FL_STATUS to FL_STATUS_VT
+        Set Field_Class_Name Field AGENDA.FL_STATUS to "dbComboForm"
+
+        Set Field_Option Field AGENDA.OBS DD_CAPSLOCK to True
+
+        Set Field_Mask_Type Field AGENDA.ID_LOC to Mask_Numeric_Window
+
+        Set Field_Option Field AGENDA.FL_IMPRIME DD_CAPSLOCK to True
+        Set Field_Class_Name Field AGENDA.FL_IMPRIME to "dbComboForm"
+        Set Field_Checkbox_Values Field AGENDA.FL_IMPRIME to "S" ""
+
+    End_Procedure
+
+    Procedure Field_Defaults
+        Forward Send Field_Defaults
+        Set Field_Changed_Value Field AGENDA.FL_STATUS to "M"
+    End_Procedure
+
+End_Class
+
+#IFDEF Is$WebApp
+#ELSE
+Use Agenda.sl
+#ENDIF

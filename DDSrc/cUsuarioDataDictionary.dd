@@ -1,0 +1,43 @@
+Use DataDict.pkg
+
+Declare_Datafile USUARIO
+Declare_Datafile PARAMETR
+
+Register_Object Usuario_sl
+
+Class cUsuarioDataDictionary is a DataDictionary
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        
+        Open USUARIO
+        Open PARAMETR
+        
+        Set Main_file to USUARIO.File_Number
+
+        Set Add_System_File to PARAMETR.File_Number DD_Lock_On_All
+
+        Set Foreign_Field_Option DD_KEYFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_AUTOFIND to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_DEFAULT DD_DISPLAYONLY to True
+
+        Set Key_Field_State Field USUARIO.ID to True
+        Set Field_Option Field USUARIO.ID DD_AUTOFIND to True
+        Set Field_Auto_Increment Field USUARIO.ID to File_Field PARAMETR.ULT_ID_USU
+        Set Field_Mask_Type Field USUARIO.ID to Mask_Numeric_Window
+        Set Field_Prompt_Object Field USUARIO.ID to Usuario_sl
+
+        Set Field_Option Field USUARIO.NOME DD_CAPSLOCK to True
+        Set Field_Prompt_Object Field USUARIO.NOME to Usuario_sl
+
+    End_Procedure
+
+End_Class
+
+#IFDEF Is$WebApp
+#ELSE
+Use Usuario.sl
+#ENDIF

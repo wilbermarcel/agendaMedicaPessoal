@@ -1,0 +1,236 @@
+Use MenuTab_Aux.pkg
+Object oMainMenuAndToolbar is a cCJCommandBarSystem
+    
+    Use MenuTab_Aux2.pkg
+
+    Object oMenuBar is a cCJMenuBar
+        Move Self to ghoMenuBar  
+        
+        Set pbEnableAnimation to True
+        Set psTitle to "Main Menu System"
+        Set pbDockNextTo to False
+        Set pbShowExpandButton to False
+        Set pbEnableDocking to True
+
+        Object oMenu1 is a cCJMenuItem
+            Set peControlType to xtpControlPopup
+            Set psCaption   to "&Cadastros/Tabelas"
+            Set psToolTip to "Cadastros/Tabelas"
+            Set psDescription to "Cadastros/Tabelas"
+            Set psCategory to "Cadastros"
+            Set pbActiveUpdate to True 
+                
+            Object oMenu1_0 is a cCJMenuItem
+                Set psCaption     to "&Usuario"
+                Set pbAddToDesignerMenu to True
+                Set psCategory to "Cadastros"
+                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+                Set psImage to "cadastro.ico"
+                Procedure OnExecute Variant vCommandBarControl
+                    Send Activate_oCadUsuario of (ClientAreaObject(ghoCommandBars))
+                End_Procedure
+            End_Object
+            
+            Object oMenu1_1 is a cCJMenuItem
+                Set psCaption     to "Especialidade"
+                Set pbAddToDesignerMenu to True
+                Set psCategory to "Cadastros"
+                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+                Set psImage to "cadastro.ico"
+                Procedure OnExecute Variant vCommandBarControl
+                    Send Activate_oCadEspecialidade of (ClientAreaObject(ghoCommandBars))
+                End_Procedure
+            End_Object
+            
+            Object oMenu1_2 is a cCJMenuItem
+                Set psCaption     to "Local"
+                Set pbAddToDesignerMenu to True
+                Set psCategory to "Cadastros"
+                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+                Set psImage to "cadastro.ico"
+                Procedure OnExecute Variant vCommandBarControl
+                    Send Activate_oCadLocal of (ClientAreaObject(ghoCommandBars))
+                End_Procedure
+            End_Object
+            
+            Object oMenu1_3 is a cCJMenuItem
+                Set psCaption     to "Paciente"
+                Set pbAddToDesignerMenu to True
+                Set psCategory to "Cadastros"
+                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+                Set psImage to "cadastro.ico"
+                Procedure OnExecute Variant vCommandBarControl
+                    Send Activate_oCadPaciente of (ClientAreaObject(ghoCommandBars))
+                End_Procedure
+            End_Object
+            
+            Object oMenu1_4 is a cCJMenuItem
+                Set psCaption     to "M‚dico/Exame"
+                Set pbAddToDesignerMenu to True
+                Set psCategory to "Cadastros"
+                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+                Set psImage to "cadastro.ico"
+                Procedure OnExecute Variant vCommandBarControl
+                    Send Activate_oCadMedicoExame of (ClientAreaObject(ghoCommandBars))
+                End_Procedure
+            End_Object
+            
+            Object oMenu1_5 is a cCJMenuItem
+                Set psCaption     to "Paramˆtro"
+                Set pbAddToDesignerMenu to True
+                Set psCategory to "Cadastros"
+                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+                Set psImage to "cadastro.ico"
+                Procedure OnExecute Variant vCommandBarControl
+                    Send Activate_oParametro of (ClientAreaObject(ghoCommandBars))
+                End_Procedure
+            End_Object
+//            
+//            Object oMenu1_5 is a cCJMenuItem
+//                Set psCaption     to "Agenda"
+//                Set pbAddToDesignerMenu to True
+//                Set psCategory to "Cadastros"
+//                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+//                Set psImage to "cadastro.ico"
+//                Procedure OnExecute Variant vCommandBarControl
+//                    Send Activate_oCadAgenda of (ClientAreaObject(ghoCommandBars))
+//                End_Procedure
+//            End_Object
+                
+//            Object oMenu1_2 is a cCJMenuItem
+//                Set peControlType to xtpControlPopup
+//                Set psCaption to "&Tabelas"
+//                Set psDescription to "Tabelas"
+//                Set pbAddToDesignerMenu to True
+//                Set psCategory to "Tabelas"
+//                Set pbActiveUpdate to True 
+//                
+//                Object oMenu1_2_7 is a cCJMenuItem
+//                    Set psCaption     to "&Niveis de Usuários"
+//                    Set pbAddToDesignerMenu to True
+//                    Set psCategory to "Tabelas"
+//                    Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+//                    Procedure OnExecute Variant vCommandBarControl
+//                        Send Activate_oTeste of (ClientAreaObject(ghoCommandBars))
+//                    End_Procedure
+//                End_Object
+//                
+//                Object oMenu1_2_8 is a cCJMenuItem
+//                    Set psCaption     to "&Dólar"
+//                    Set pbAddToDesignerMenu to True
+//                    Set psCategory to "Tabelas"
+//                    Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+//                    Procedure OnExecute Variant vCommandBarControl
+//                    Send Activate_oTeste of (ClientAreaObject(ghoCommandBars))
+//                    End_Procedure
+//                End_Object
+//                
+//            End_Object
+
+        End_Object 
+        
+//        Object oMenu2 is a cCJMenuItem
+//            Set peControlType to xtpControlPopup
+//            Set psCaption to "&Consultas"
+//            Set psDescription to "Consultas"
+//            Set pbAddToDesignerMenu to True
+//            Set psCategory to "Consultas"
+//            Set pbActiveUpdate to True 
+//            
+//            Object oMenu2_1 is a cCJMenuItem
+//                Set psCaption     to "&Bens por Local"
+//                Set pbAddToDesignerMenu to True
+//                Set psCategory to "Consultas"
+//                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+//                Procedure OnExecute Variant vCommandBarControl
+//                    Send Activate_oTeste of (ClientAreaObject(ghoCommandBars))
+//                End_Procedure
+//            End_Object
+//            
+//            Object oMenu2_2 is a cCJMenuItem
+//                Set psCaption     to "&Bens por Depto"
+//                Set pbAddToDesignerMenu to True
+//                Set psCategory to "Consultas"
+//                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+//                Procedure OnExecute Variant vCommandBarControl
+//                    Send Activate_oTeste of (ClientAreaObject(ghoCommandBars))
+//                End_Procedure
+//            End_Object
+//        End_Object
+        
+//        Object oMenu3 is a cCJMenuItem
+//            Set peControlType to xtpControlPopup
+//            Set psCaption to "&Relatórios"
+//            Set psDescription to "Relatórios"
+//            Set pbAddToDesignerMenu to True
+//            Set psCategory to "Relatórios"
+//            Set pbActiveUpdate to True 
+//
+//            Object oMenu3_4 is a cCJMenuItem
+//                Set pbControlBeginGroup to True
+//                Set psCaption     to "&Itens por Local/Depto"
+//                Set pbAddToDesignerMenu to True
+//                Set psCategory to "Relatórios"
+//                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+//                Procedure OnExecute Variant vCommandBarControl
+//                    Send Activate_oTeste of (ClientAreaObject(ghoCommandBars))
+//                End_Procedure
+//            End_Object
+//            
+//            Object oMenu3_10 is a cCJMenuItem
+//                Set psCaption     to "&Relação de Bens por Local/Classif"
+//                Set pbAddToDesignerMenu to True
+//                Set psCategory to "Relatórios"
+//                Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+//                Procedure OnExecute Variant vCommandBarControl
+//                    Send Activate_oTeste of (ClientAreaObject(ghoCommandBars))
+//                End_Procedure
+//            End_Object
+//            
+//        End_Object
+
+        Object oExitMenu is a cCJExitMenuItem
+            Set pbControlBeginGroup to True
+            Set pbAddToDesignerMenu to True
+            Set psImage to "Exit064N32.ico"
+            Set psToolTip to ""
+            Set psCategory to "Sair"
+            Set peControlStyle to (peMenuControlStyle(ghoValueObject))
+            Set psDescription to "Sair da Aplicação"
+        End_Object 
+
+    End_Object 
+
+    Object oViewsToolbar is a cCJToolbar     
+        Set psTitle to "Programas"
+        Set pbDockNextTo to False
+        Object oExemploToolbar1 is a cCJMenuItem
+            Set psCaption to "Cadastro Agenda"
+            Set psToolTip to "Cadastro Agenda"
+            Set peControlStyle to (peToolBarControlStyle(ghoValueObject))
+            Set psImage to "agenda2.ico"
+            Set psDescription to "Cadastro Agenda"
+            
+            Procedure OnExecute Variant vCommandBarControl
+                Send Activate_ocadAgenda of (ClientAreaObject(ghoCommandBars))
+            End_Procedure
+        End_Object 
+        
+        Object oExemploToolbar2 is a cCJMenuItem
+            Set psCaption to "Consulta Agenda"
+            Set psToolTip to "Consulta Agenda"
+            Set peControlStyle to (peToolBarControlStyle(ghoValueObject))
+            Set psImage to "agenda3.ico"
+            Set psDescription to "Consulta Agenda"
+            
+            Procedure OnExecute Variant vCommandBarControl
+                Send Activate_oConsAgenda of (ClientAreaObject(ghoCommandBars))
+            End_Procedure
+        End_Object
+
+    End_Object
+    
+    Use MenuTab_Controls.pkg
+    Use MenuTab_StatusBar.pkg
+
+End_Object 

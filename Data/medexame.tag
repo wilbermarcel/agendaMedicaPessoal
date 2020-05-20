@@ -1,0 +1,4 @@
+ID
+NOME
+ID_ESP
+ID_LOC

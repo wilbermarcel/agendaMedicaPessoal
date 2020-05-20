@@ -1,0 +1,42 @@
+[Workspace]
+CurrentProject=AgendamentoMedicoPessoal.src
+Location=C:\Users\Wilber\Documents\Visual DataFlex Projects\SistemaAgendamentoMedicoPessoalv16\IdeSrc\Wilber_Studio.dsk
+[TabWindows]
+GroupCount=1
+HorizontalGroups=1
+[TabGroup0]
+GroupSize=40
+SelectedTab=2
+[Window0]
+Filename=C:\Users\Wilber\Documents\Visual DataFlex Projects\SistemaAgendamentoMedicoPessoalv16\AppSrc\AgendamentoMedicoPessoal.src
+ViewType=1
+Top=22
+Left=2
+Bottom=438
+Right=920
+CursorLine=31
+CursorColumn=43
+TabIndex=0
+TabGroup=0
+[Window1]
+Filename=C:\Users\Wilber\Documents\Visual DataFlex Projects\SistemaAgendamentoMedicoPessoalv16\AppSrc\menu_principal.mn
+ViewType=1
+Top=22
+Left=2
+Bottom=438
+Right=920
+CursorLine=217
+CursorColumn=8
+TabIndex=1
+TabGroup=0
+[Window2]
+Filename=C:\Users\Wilber\Documents\Visual DataFlex Projects\SistemaAgendamentoMedicoPessoalv16\AppSrc\ConsAgenda.vw
+ViewType=1
+Top=22
+Left=2
+Bottom=438
+Right=920
+CursorLine=108
+CursorColumn=15
+TabIndex=2
+TabGroup=0

@@ -1,0 +1,55 @@
+Use ccrystal.pkg
+use subreport.pkg          
+Use cIniFile.pkg
+Use CgcCPf.pkg
+Use fConnSql.pkg    
+
+Object oIniFileSystem is a cIniFile
+    Function PrimaryDataPath Returns String
+        String sDataPath sPrimaryDataPath
+        Get psProgramPath of (phoWorkspace(ghoApplication)) to sDataPath
+        Get PathAtIndex of (phoWorkspace(ghoApplication)) sDataPath 1 to sPrimaryDataPath
+        Function_Return sPrimaryDataPath
+    End_Function
+    Set psFileName to (PrimaryDataPath(Self) +"\Config.ini")
+End_Object
+
+Class _cCrystal11 is a cCrystal
+    
+    Procedure Construct_Object 
+        Forward Send Construct_Object
+        Property Integer piOrientacao 1 
+        Property String  psNomeRelatorio
+    End_Procedure
+    
+    Procedure RunReport 
+        String sRelatorio sWorkspace sRPTPath sNomeRelatorio
+        Get psReportName    to sRelatorio
+        Set psReportName    to (Trim(sRelatorio))
+        Set psNomeRelatorio to (Trim(sRelatorio))
+        Get ReadString of oIniFileSystem "crystal" "rpt" "" to sRPTPath 
+        If (sRPTPath <> "") Begin
+            If (mid(sRPTPath,1,length(sRPTPath)) <> "\" ) Move (sRPTPath+"\") to sRPTPath
+            Get psReportName to sNomeRelatorio
+            Set psReportName to (sRPTPath+sNomeRelatorio)
+        End
+        Else Begin
+            Send stop_box "Ocorreu um erro durante a execu‡Æo do relat¢rio, \navisar o Respons vel pelo sistema imediatamente." "Erro"
+            Send stop_box "Problemas com o Caminho do relat¢rio" "Erro"
+            Set psReportName to ""
+            Procedure_Return
+        End
+        Forward Send RunReport
+    End_Procedure
+                             
+    Procedure OnInitializeReport Handle hoReport
+        Forward Send OnInitializeReport  hoReport     
+        String sNomeRelatorio
+        Integer iRet
+        Set peOutputDestination to WQL_PRINT_TO_WINDOW   
+        Get psNomeRelatorio to sNomeRelatorio
+        Send AssignFormula of hoReport "programa" ('"' + sNomeRelatorio + '"')
+        Move (GetConectaServidorBancoSQL(hoReport)) to iRet     
+    End_Procedure 
+        
+End_Class
